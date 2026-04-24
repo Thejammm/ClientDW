@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AHS Director Walkround</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f2f4f7;
+      --surface: #ffffff;
+      --primary: #757575;
+      --primary-light: #555555;
+      --accent: #4BBFD6;
+      --accent-light: #e6f7fb;
+      --text: #3a3a3a;
+      --text-muted: #787878;
+      --border: #d0d5dd;
+      --input-bg: #f8fafb;
+      --success: #1a7a4a;
+      --success-bg: #e8f7ef;
+      --warning: #b45309;
+      --warning-bg: #fef3cd;
+      --danger: #b91c1c;
+      --danger-bg: #fee2e2;
+      --muted-bg: #f2f4f7;
+      --radius: 8px;
+      --shadow: 0 1px 4px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.07);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    #wr-app-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      color: var(--text);
+      border-bottom: 3px solid var(--accent);
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    }
+
+    .wr-header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .wr-header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .wr-header-icon {
+      background: var(--accent);
+      border-radius: 8px;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .wr-header-icon svg {
+      width: 20px;
+      height: 20px;
+      color: var(--primary);
+    }
+
+    .wr-header-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--primary);
+    }
+
+    .wr-header-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .wr-header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .wr-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      padding: 7px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1.5px solid transparent;
+      white-space: nowrap;
+    }
+
+    .wr-btn svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .wr-btn-save {
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .wr-btn-save:hover {
+      background: #38a8c2;
+      border-color: #38a8c2;
+    }
+
+    .wr-btn-save:active {
+      transform: scale(0.97);
+    }
+
+    .wr-btn-outline {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    .wr-btn-outline:hover {
+      background: var(--muted-bg);
+      border-color: var(--primary);
+      color: var(--text);
+    }
+
+    .wr-btn-sep {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+      margin: 0 2px;
+    }
+
+    .wr-save-toast {
+      position: fixed;
+      top: 68px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      background: var(--primary);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 9999;
+      white-space: nowrap;
+    }
+
+    .wr-save-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .wr-save-toast.error {
+      background: var(--danger);
+    }
+
+    .wr-save-toast.info {
+      background: #1976d2;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 20px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .wr-card {
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      animation: wr-fadeUp 0.35s ease both;
+    }
+
+    .wr-card:nth-child(1) { animation-delay: 0.04s; }
+    .wr-card:nth-child(2) { animation-delay: 0.10s; }
+    .wr-card:nth-child(3) { animation-delay: 0.16s; }
+    .wr-card:nth-child(4) { animation-delay: 0.22s; }
+
+    @keyframes wr-fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .wr-card-header {
+      padding: 18px 20px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .wr-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .wr-card-title svg {
+      width: 18px;
+      height: 18px;
+      color: var(--accent);
+    }
+
+    .wr-card-body {
+      padding: 20px;
+    }
+
+    .wr-field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .wr-field-grid .wr-full {
+      grid-column: 1 / -1;
+    }
+
+    .wr-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .wr-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    input[type="text"],
+    input[type="date"],
+    textarea,
+    select {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--input-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 11px;
+      width: 100%;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(30,58,95,0.1);
+      background: #fff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 70px;
+      overflow: hidden;
+    }
+
+    select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7f94' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 28px;
+    }
+
+    ::placeholder {
+      color: #aab4bf;
+    }
+
+    select.wr-status-compliant {
+      color: var(--success);
+      border-color: #a7e3c0;
+      background-color: var(--success-bg);
+    }
+
+    select.wr-status-partial {
+      color: var(--warning);
+      border-color: #fcd88a;
+      background-color: var(--warning-bg);
+    }
+
+    select.wr-status-non-compliant {
+      color: var(--danger);
+      border-color: #fca5a5;
+      background-color: var(--danger-bg);
+    }
+
+    select.wr-status-na {
+      color: var(--text-muted);
+    }
+
+    .wr-empty-state {
+      text-align: center;
+      padding: 36px 20px;
+      color: var(--text-muted);
+      font-size: 13.5px;
+    }
+
+    .wr-stats-bar {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .wr-stat-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .wr-stat-badge svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .wr-stat-compliant {
+      color: var(--success);
+    }
+
+    .wr-stat-partial {
+      color: var(--warning);
+    }
+
+    .wr-stat-noncompliant {
+      color: var(--danger);
+    }
+
+    .wr-stat-na {
+      color: var(--text-muted);
+    }
+
+    .wr-cdm-group {
+      margin-bottom: 22px;
+    }
+
+    .wr-cdm-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .wr-cdm-group-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      border-bottom: 1.5px solid var(--border);
+      padding-bottom: 6px;
+      margin-bottom: 10px;
+    }
+
+    .wr-cdm-row {
+      display: grid;
+      grid-template-columns: 1fr 160px 1fr;
+      gap: 10px;
+      align-items: start;
+      background: var(--muted-bg);
+      border-radius: 7px;
+      padding: 11px 12px;
+      margin-bottom: 7px;
+    }
+
+    .wr-cdm-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .wr-cdm-requirement {
+      font-size: 13.5px;
+      font-weight: 500;
+      padding-top: 6px;
+    }
+
+    .wr-logo-upload-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1.5px solid var(--border);
+    }
+
+    .wr-logo-slot {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .wr-logo-slot-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .wr-logo-preview-wrap {
+      position: relative;
+      height: 64px;
+      border: 1.5px dashed var(--border);
+      border-radius: 7px;
+      background: var(--muted-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .wr-logo-preview-wrap:hover {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .wr-logo-preview-wrap img {
+      max-height: 52px;
+      max-width: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .wr-logo-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--text-muted);
+      font-size: 11px;
+      pointer-events: none;
+    }
+
+    .wr-logo-placeholder svg {
+      width: 20px;
+      height: 20px;
+      opacity: 0.5;
+    }
+
+    .wr-logo-clear {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(0,0,0,0.4);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 11px;
+      line-height: 1;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wr-logo-preview-wrap:hover .wr-logo-clear {
+      display: flex;
+    }
+
+    .wr-photo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .wr-photo-card {
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .wr-photo-img-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: var(--muted-bg);
+      overflow: hidden;
+    }
+
+    .wr-photo-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .wr-photo-remove {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(0,0,0,0.55);
+      border: none;
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      transition: background 0.15s;
+    }
+
+    .wr-photo-remove:hover {
+      background: var(--danger);
+    }
+
+    .wr-photo-num {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      background: rgba(0,0,0,0.55);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: 'DM Mono', monospace;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .wr-photo-fields {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .wr-photo-fields input,
+    .wr-photo-fields textarea {
+      font-size: 12px;
+      padding: 6px 8px;
+    }
+
+    .wr-photo-fields textarea {
+      min-height: 48px;
+      resize: vertical;
+      overflow: hidden;
+    }
+
+    @media (max-width: 700px) {
+      .wr-photo-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 440px) {
+      .wr-photo-grid {
+        grid-template-columns: 1fr;
+      }
+      .wr-logo-upload-row {
+        grid-template-columns: 1fr;
+      }
+      .wr-field-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .wr-change-card {
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      background: var(--surface);
+    }
+
+    .wr-change-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .wr-change-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .wr-change-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .wr-rrr-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .wr-btn-ghost {
+      background: transparent;
+      border-color: transparent;
+      color: var(--text-muted);
+      padding: 5px 8px;
+    }
+
+    .wr-btn-ghost:hover {
+      color: var(--danger);
+      background: var(--danger-bg);
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    @media print {
+      .wr-no-print {
+        display: none !important;
+      }
+      body {
+        background: white;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header id="wr-app-header">
+    <div class="wr-header-inner">
+      <div class="wr-header-brand">
+        <div class="wr-header-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <div>
+          <div class="wr-header-title">AHS Director Walkround</div>
+          <div class="wr-header-sub">Site Inspection Report</div>
+        </div>
+      </div>
+      <div class="wr-header-actions">
+        <button class="wr-btn wr-btn-save" id="wr-btnSave" title="Save to browser">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          Save
+        </button>
+        <button class="wr-btn wr-btn-outline" id="wr-btnSaveAs" title="Download as file (Ctrl+S)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Save As
+        </button>
+        <div class="wr-btn-sep"></div>
+        <button class="wr-btn wr-btn-outline" id="wr-btnPDF" title="Export to PDF">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="19" x2="12" y2="11"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          Export PDF
+        </button>
+        <button class="wr-btn wr-btn-outline wr-no-print" id="wr-btnPrint" onclick="window.print()" title="Print (Ctrl+P)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          Print
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Logos -->
+    <div class="wr-card">
+      <div class="wr-card-body">
+        <div class="wr-logo-upload-row">
+          <div class="wr-logo-slot">
+            <label class="wr-logo-slot-label">Your Logo</label>
+            <div class="wr-logo-preview-wrap" onclick="document.getElementById('wr-ahsLogoInput').click()">
+              <img id="wr-ahsLogoPreview" style="display:none;">
+              <div class="wr-logo-placeholder" id="wr-ahsLogoPlaceholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                Upload logo
+              </div>
+              <button class="wr-logo-clear wr-no-print" id="wr-ahsLogoClear" onclick="clearWrLogo('ahs', event)">✕</button>
+            </div>
+            <input type="file" id="wr-ahsLogoInput" accept="image/*">
+          </div>
+          <div class="wr-logo-slot">
+            <label class="wr-logo-slot-label">Client Logo</label>
+            <div class="wr-logo-preview-wrap" onclick="document.getElementById('wr-clientLogoInput').click()">
+              <img id="wr-clientLogoPreview" style="display:none;">
+              <div class="wr-logo-placeholder" id="wr-clientLogoPlaceholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                Upload client logo
+              </div>
+              <button class="wr-logo-clear wr-no-print" id="wr-clientLogoClear" onclick="clearWrLogo('client', event)">✕</button>
+            </div>
+            <input type="file" id="wr-clientLogoInput" accept="image/*">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project Details -->
+    <div class="wr-card">
+      <div class="wr-card-header">
+        <div class="wr-card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+          Project Details
+        </div>
+      </div>
+      <div class="wr-card-body">
+        <div class="wr-field-grid">
+          <div class="wr-field"><label class="wr-label">Project Name</label><input type="text" id="wr-projectName" placeholder="e.g. The Woodlands Phase 2"></div>
+          <div class="wr-field"><label class="wr-label">Project Reference</label><input type="text" id="wr-projectRef" placeholder="e.g. PRJ-2026-001"></div>
+          <div class="wr-field"><label class="wr-label">Site Address</label><input type="text" id="wr-siteAddress" placeholder="Full site address"></div>
+          <div class="wr-field"><label class="wr-label">Client</label><input type="text" id="wr-clientName" placeholder="Client name"></div>
+          <div class="wr-field"><label class="wr-label">Principal Contractor</label><input type="text" id="wr-principalContractor" placeholder="Principal Contractor"></div>
+          <div class="wr-field"><label class="wr-label">Walkround Date</label><input type="date" id="wr-date"></div>
+          <div class="wr-field"><label class="wr-label">Director / Inspector</label><input type="text" id="wr-director" placeholder="Name of director conducting walkround"></div>
+          <div class="wr-field"><label class="wr-label">PC Representative</label><input type="text" id="wr-pcRep" placeholder="PC representative accompanying"></div>
+          <div class="wr-field wr-full"><label class="wr-label">Areas Inspected</label><textarea id="wr-areas" rows="2" placeholder="List the areas of site visited during this walkround..."></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Site Condition Checklist -->
+    <div class="wr-card">
+      <div class="wr-card-header">
+        <div class="wr-card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          Site Condition Checklist
+        </div>
+      </div>
+      <div class="wr-stats-bar" id="wr-stats"></div>
+      <div class="wr-card-body" id="wr-checklist-body"></div>
+    </div>
+
+    <!-- Observations -->
+    <div class="wr-card">
+      <div class="wr-card-header">
+        <div class="wr-card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 4h2.5A2 2 0 0121 6v2.5M6 4H3.5A2 2 0 001 6v12a2 2 0 002 2h3.5M9 9h6m-6 4h6m-5 5h4"></path></svg>
+          Observations & Actions
+        </div>
+      </div>
+      <div class="wr-card-body">
+        <div class="wr-field-grid">
+          <div class="wr-field wr-full"><label class="wr-label">Positive Observations</label><textarea id="wr-positives" rows="3" placeholder="What was being done well on site..."></textarea></div>
+          <div class="wr-field wr-full"><label class="wr-label">Areas of Concern</label><textarea id="wr-concerns" rows="3" placeholder="Issues or areas requiring attention..."></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Immediate Actions -->
+    <div class="wr-card">
+      <div class="wr-card-header">
+        <div class="wr-card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
+          Immediate Actions
+        </div>
+        <button class="wr-btn wr-btn-outline wr-no-print" onclick="addWrAction()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Action
+        </button>
+      </div>
+      <div class="wr-card-body"><div id="wr-actions-body"><div class="wr-empty-state">No immediate actions recorded. Click "Add Action" to log one.</div></div></div>
+    </div>
+
+    <!-- Site Photographs -->
+    <div class="wr-card">
+      <div class="wr-card-header">
+        <div class="wr-card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          Site Photographs
+          <span id="wr-photo-count" style="font-size:12px;color:var(--text-muted);font-weight:500;"></span>
+        </div>
+        <label class="wr-btn wr-btn-outline wr-no-print" style="cursor:pointer;margin:0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
+          Add Photos
+          <input type="file" id="wr-photoInput" multiple accept="image/*" style="display:none;">
+        </label>
+      </div>
+      <div class="wr-card-body">
+        <div id="wr-photo-empty" class="wr-empty-state">No photos added yet.</div>
+        <div id="wr-photo-grid"></div>
+      </div>
+    </div>
+
+    <!-- Director Sign-Off -->
+    <div class="wr-card">
+      <div class="wr-card-header">
+        <div class="wr-card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><path d="M20 8v6M23 11h-6"></path></svg>
+          Director Sign-Off
+        </div>
+      </div>
+      <div class="wr-card-body">
+        <div class="wr-field-grid">
+          <div class="wr-field"><label class="wr-label">Overall Site Rating</label>
+            <select id="wr-rating">
+              <option value="">-- Select rating --</option>
+              <option value="Good">Good</option>
+              <option value="Satisfactory">Satisfactory</option>
+              <option value="Poor">Poor</option>
+            </select>
+          </div>
+          <div class="wr-field"><label class="wr-label">Follow-up Required By</label><input type="date" id="wr-followupDate"></div>
+          <div class="wr-field wr-full"><label class="wr-label">Director's Comments</label><textarea id="wr-comments" rows="3" placeholder="Overall comments and any follow-up requirements..."></textarea></div>
+          <div class="wr-field"><label class="wr-label">Director Name (print)</label><input type="text" id="wr-directorPrint" placeholder="Full name"></div>
+          <div class="wr-field"><label class="wr-label">Date Signed</label><input type="date" id="wr-signedDate"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="wr-save-toast" id="wr-saveToast"></div>
+
+  <script>
+    // ========== DATA STRUCTURES ==========
+    const wrItems = [
+      { id:'w1',  category:'Welfare & Site Setup',   requirement:'Welfare facilities clean, stocked and adequate for workforce',       status:'compliant', notes:'' },
+      { id:'w2',  category:'Welfare & Site Setup',   requirement:'Site office / cabin in good order',                                  status:'compliant', notes:'' },
+      { id:'w3',  category:'Welfare & Site Setup',   requirement:'Signage and hoarding adequate and in good condition',                status:'compliant', notes:'' },
+      { id:'w4',  category:'Health & Safety',        requirement:'PPE being worn correctly by all operatives',                         status:'compliant', notes:'' },
+      { id:'w5',  category:'Health & Safety',        requirement:'Work at height controls are in place and adequate',                  status:'compliant', notes:'' },
+      { id:'w6',  category:'Health & Safety',        requirement:'Housekeeping and site tidiness satisfactory',                        status:'compliant', notes:'' },
+      { id:'w7',  category:'Health & Safety',        requirement:'Access and egress routes clear and safe',                            status:'compliant', notes:'' },
+      { id:'w8',  category:'Health & Safety',        requirement:'No evidence of unsafe practices or behaviours observed',             status:'compliant', notes:'' },
+      { id:'w9',  category:'Management & Supervision','requirement':'Competent supervision present and engaged',                       status:'compliant', notes:'' },
+      { id:'w10', category:'Management & Supervision','requirement':'Workforce appear competent and aware of risks',                   status:'compliant', notes:'' },
+      { id:'w11', category:'Management & Supervision','requirement':'RAMS and site rules being followed',                              status:'compliant', notes:'' },
+      { id:'w12', category:'Progress & Quality',     requirement:'Works progressing in line with programme',                          status:'compliant', notes:'' },
+      { id:'w13', category:'Progress & Quality',     requirement:'Quality of workmanship satisfactory',                               status:'compliant', notes:'' },
+    ];
+    const wrActions = [];
+    let wrPhotos = [];
+    let wrAhsLogoData = null;
+    let wrClientLogoData = null;
+
+    // ========== UI HELPERS ==========
+    function statusClass(status) {
+      const map = {
+        'compliant': 'wr-status-compliant',
+        'partial': 'wr-status-partial',
+        'non-compliant': 'wr-status-non-compliant',
+        'na': 'wr-status-na'
+      };
+      return map[status] || 'wr-status-na';
+    }
+
+    function safeDate(v) {
+      if (!v) return '';
+      try {
+        const d = new Date(v);
+        return isNaN(d) ? '' : d.toISOString().slice(0, 10);
+      } catch (e) {
+        return '';
+      }
+    }
+
+    // ========== CHECKLIST RENDERING ==========
+    function renderWrChecklist() {
+      const grouped = {};
+      const order = [];
+      wrItems.forEach(item => {
+        if (!grouped[item.category]) { grouped[item.category] = []; order.push(item.category); }
+        grouped[item.category].push(item);
+      });
+      const counts = { compliant: 0, partial: 0, 'non-compliant': 0, na: 0 };
+      wrItems.forEach(i => counts[i.status] = (counts[i.status] || 0) + 1);
+
+      let html = '';
+      order.forEach(cat => {
+        html += `<div class="wr-cdm-group"><div class="wr-cdm-group-title">${cat}</div>`;
+        grouped[cat].forEach((item) => {
+          html += `<div class="wr-cdm-row"><div class="wr-cdm-requirement">${item.requirement}</div>
+            <select class="${statusClass(item.status)}" onchange="updateWrItem('${item.id}','status',this.value)">
+              <option value="compliant" ${item.status === 'compliant' ? 'selected' : ''}>Compliant</option>
+              <option value="partial" ${item.status === 'partial' ? 'selected' : ''}>Partial</option>
+              <option value="non-compliant" ${item.status === 'non-compliant' ? 'selected' : ''}>Non-Compliant</option>
+              <option value="na" ${item.status === 'na' ? 'selected' : ''}>N/A</option>
+            </select>
+            <textarea rows="1" placeholder="Notes..." oninput="updateWrItem('${item.id}','notes',this.value); scheduleAutoSave();">${item.notes}</textarea>
+          </div>`;
+        });
+        html += '</div>';
+      });
+      document.getElementById('wr-checklist-body').innerHTML = html;
+
+      document.getElementById('wr-stats').innerHTML = `
+        <span class="wr-stat-badge wr-stat-compliant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>${counts.compliant} Compliant</span>
+        <span class="wr-stat-badge wr-stat-partial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${counts.partial} Partial</span>
+        <span class="wr-stat-badge wr-stat-noncompliant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>${counts['non-compliant']} Issues</span>`;
+    }
+
+    function updateWrItem(id, field, value) {
+      const item = wrItems.find(i => i.id === id);
+      if (item) {
+        item[field] = value;
+        if (field === 'status') renderWrChecklist();
+        scheduleAutoSave();
+      }
+    }
+
+    // ========== ACTIONS RENDERING ==========
+    function addWrAction() {
+      wrActions.push({ id: 'wa-' + Date.now(), description: '', responsible: '', dueDate: '', priority: 'medium' });
+      renderWrActions();
+      scheduleAutoSave();
+    }
+
+    function removeWrAction(id) {
+      const idx = wrActions.findIndex(a => a.id === id);
+      if (idx > -1) wrActions.splice(idx, 1);
+      renderWrActions();
+      scheduleAutoSave();
+    }
+
+    function updateWrAction(id, field, value) {
+      const a = wrActions.find(a => a.id === id);
+      if (a) a[field] = value;
+      scheduleAutoSave();
+    }
+
+    function renderWrActions() {
+      const body = document.getElementById('wr-actions-body');
+      if (!wrActions.length) {
+        body.innerHTML = '<div class="wr-empty-state">No immediate actions recorded.</div>';
+        return;
+      }
+      body.innerHTML = wrActions.map((a, i) => `
+        <div class="wr-change-card">
+          <div class="wr-change-top">
+            <span class="wr-change-num">ACTION #${String(i + 1).padStart(3, '0')}</span>
+            <button class="wr-btn wr-btn-ghost wr-no-print" onclick="removeWrAction('${a.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+          </div>
+          <div class="wr-field" style="margin-bottom:8px"><label class="wr-label">Action Required</label><textarea rows="2" placeholder="Describe the action required..." oninput="updateWrAction('${a.id}','description',this.value); scheduleAutoSave();">${a.description}</textarea></div>
+          <div class="wr-rrr-grid">
+            <div class="wr-field"><label class="wr-label">Responsible Party</label><input type="text" value="${a.responsible}" placeholder="Name / organisation" oninput="updateWrAction('${a.id}','responsible',this.value); scheduleAutoSave();"></div>
+            <div class="wr-field"><label class="wr-label">Due Date</label><input type="date" value="${safeDate(a.dueDate)}" onchange="updateWrAction('${a.id}','dueDate',this.value); scheduleAutoSave();"></div>
+          </div>
+          <div class="wr-field" style="margin-top:8px"><label class="wr-label">Priority</label>
+            <select onchange="updateWrAction('${a.id}','priority',this.value); scheduleAutoSave();">
+              <option value="low" ${a.priority === 'low' ? 'selected' : ''}>Low</option>
+              <option value="medium" ${a.priority === 'medium' ? 'selected' : ''}>Medium</option>
+              <option value="high" ${a.priority === 'high' ? 'selected' : ''}>High — immediate attention</option>
+              <option value="stop" ${a.priority === 'stop' ? 'selected' : ''}>STOP WORKS — critical</option>
+            </select>
+          </div>
+        </div>`).join('');
+    }
+
+    // ========== PHOTO SYSTEM ==========
+    function compressImage(dataUrl, maxDim, quality) {
+      maxDim = maxDim || 1200;
+      quality = quality || 0.75;
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          let w = img.naturalWidth, h = img.naturalHeight;
+          if (w > maxDim || h > maxDim) {
+            if (w >= h) { h = Math.round(h * maxDim / w); w = maxDim; }
+            else { w = Math.round(w * maxDim / h); h = maxDim; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+      });
+    }
+
+    function handleWrPhotoUpload(input) {
+      const files = Array.from(input.files);
+      if (!files.length) return;
+      let loaded = 0;
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const rawDataUrl = e.target.result;
+          if (rawDataUrl) {
+            compressImage(rawDataUrl, 1200, 0.75).then(compressed => {
+              wrPhotos.push({ id: 'ph-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6), dataUrl: compressed, caption: '', location: '' });
+              loaded++;
+              if (loaded === files.length) { renderWrPhotos(); scheduleAutoSave(); input.value = ''; }
+            });
+          } else {
+            loaded++;
+            if (loaded === files.length) { renderWrPhotos(); input.value = ''; }
+          }
+        };
+        reader.onerror = () => { loaded++; if (loaded === files.length) { renderWrPhotos(); input.value = ''; } };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function removeWrPhoto(id) {
+      const idx = wrPhotos.findIndex(p => p.id === id);
+      if (idx > -1) wrPhotos.splice(idx, 1);
+      renderWrPhotos();
+      scheduleAutoSave();
+    }
+
+    function updateWrPhoto(id, field, value) {
+      const p = wrPhotos.find(p => p.id === id);
+      if (p) { p[field] = value; scheduleAutoSave(); }
+    }
+
+    function renderWrPhotos() {
+      const grid = document.getElementById('wr-photo-grid');
+      const empty = document.getElementById('wr-photo-empty');
+      const label = document.getElementById('wr-photo-count');
+      label.textContent = wrPhotos.length ? `${wrPhotos.length} photo${wrPhotos.length !== 1 ? 's' : ''}` : '';
+      if (!wrPhotos.length) { empty.style.display = 'block'; grid.innerHTML = ''; grid.className = ''; return; }
+      empty.style.display = 'none';
+      grid.className = 'wr-photo-grid';
+      grid.innerHTML = wrPhotos.map((p, idx) => `
+        <div class="wr-photo-card" id="wr-photo-card-${p.id}">
+          <div class="wr-photo-img-wrap">
+            <img src="${p.dataUrl}" alt="Site photo ${idx + 1}" loading="lazy">
+            <span class="wr-photo-num">IMG ${String(idx + 1).padStart(2, '0')}</span>
+            <button class="wr-photo-remove wr-no-print" onclick="removeWrPhoto('${p.id}')" title="Remove photo">×</button>
+          </div>
+          <div class="wr-photo-fields">
+            <div class="wr-field"><label class="wr-label">Caption / Description</label><textarea rows="2" placeholder="Describe what this photo shows..." oninput="updateWrPhoto('${p.id}','caption',this.value); scheduleAutoSave();">${p.caption}</textarea></div>
+            <div class="wr-field"><label class="wr-label">Location on site</label><input type="text" placeholder="e.g. Block A, Level 2, Plant room" value="${p.location}" oninput="updateWrPhoto('${p.id}','location',this.value); scheduleAutoSave();"></div>
+          </div>
+        </div>`).join('');
+    }
+
+    // ========== LOGO HANDLING ==========
+    function loadWrLogo(which, input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const data = e.target.result;
+        if (!data) return;
+        if (which === 'ahs') {
+          wrAhsLogoData = data;
+          document.getElementById('wr-ahsLogoPreview').src = data;
+          document.getElementById('wr-ahsLogoPreview').style.display = 'block';
+          document.getElementById('wr-ahsLogoPlaceholder').style.display = 'none';
+          document.getElementById('wr-ahsLogoClear').style.display = 'flex';
+        } else {
+          wrClientLogoData = data;
+          document.getElementById('wr-clientLogoPreview').src = data;
+          document.getElementById('wr-clientLogoPreview').style.display = 'block';
+          document.getElementById('wr-clientLogoPlaceholder').style.display = 'none';
+          document.getElementById('wr-clientLogoClear').style.display = 'flex';
+        }
+        scheduleAutoSave();
+        input.value = '';
+      };
+      reader.onerror = () => { alert('Could not read the image file. Please try a different image.'); input.value = ''; };
+      reader.readAsDataURL(file);
+    }
+
+    function clearWrLogo(which, e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (which === 'ahs') {
+        wrAhsLogoData = null;
+        document.getElementById('wr-ahsLogoPreview').style.display = 'none';
+        document.getElementById('wr-ahsLogoPlaceholder').style.display = 'flex';
+        document.getElementById('wr-ahsLogoClear').style.display = 'none';
+      } else {
+        wrClientLogoData = null;
+        document.getElementById('wr-clientLogoPreview').style.display = 'none';
+        document.getElementById('wr-clientLogoPlaceholder').style.display = 'flex';
+        document.getElementById('wr-clientLogoClear').style.display = 'none';
+      }
+      scheduleAutoSave();
+    }
+
+    // ========== SAVE/LOAD SYSTEM ==========
+    const WR_STORE_KEY = 'wr:save:v1';
+    const WR_EMBED_ID = 'wr-embedded-save-data';
+
+    let _toastTimer = null;
+    function showWrToast(msg, type, duration) {
+      type = type || 'success';
+      duration = duration || 2800;
+      const el = document.getElementById('wr-saveToast');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'wr-save-toast show' + (type !== 'success' ? ' ' + type : '');
+      clearTimeout(_toastTimer);
+      _toastTimer = setTimeout(() => { el.className = 'wr-save-toast'; }, duration);
+    }
+
+    function wrGetFields() {
+      const ids = ['wr-projectName', 'wr-projectRef', 'wr-siteAddress', 'wr-clientName', 'wr-principalContractor', 'wr-date', 'wr-director', 'wr-pcRep', 'wr-areas', 'wr-positives', 'wr-concerns', 'wr-rating', 'wr-followupDate', 'wr-comments', 'wr-directorPrint', 'wr-signedDate'];
+      const out = {};
+      ids.forEach(id => { const el = document.getElementById(id); if (el) out[id] = el.value || ''; });
+      return out;
+    }
+
+    function wrSetFields(fields) {
+      if (!fields) return;
+      Object.keys(fields).forEach(id => { const el = document.getElementById(id); if (el) el.value = fields[id] || ''; });
+    }
+
+    function isValidDataUrl(v) {
+      return typeof v === 'string' && v.startsWith('data:') && v.indexOf(',') > 5;
+    }
+
+    function wrSerialize() {
+      return {
+        meta: { version: 1, savedAt: new Date().toISOString(), appKey: 'WR-Walkround' },
+        fields: wrGetFields(),
+        wrItems: wrItems.map(i => ({ ...i })),
+        wrActions: wrActions.map(a => ({ ...a })),
+        wrPhotos: wrPhotos.filter(p => isValidDataUrl(p.dataUrl)).map(p => ({ ...p })),
+        wrAhsLogo: isValidDataUrl(wrAhsLogoData) ? wrAhsLogoData : null,
+        wrClientLogo: isValidDataUrl(wrClientLogoData) ? wrClientLogoData : null,
+      };
+    }
+
+    function wrRestore(payload) {
+      if (!payload || payload.meta?.appKey !== 'WR-Walkround') return false;
+      wrSetFields(payload.fields);
+      if (payload.wrItems?.length) {
+        payload.wrItems.forEach(saved => {
+          const live = wrItems.find(i => i.id === saved.id);
+          if (live) { live.status = saved.status; live.notes = saved.notes; }
+        });
+      }
+      renderWrChecklist();
+      wrActions.length = 0;
+      if (payload.wrActions?.length) payload.wrActions.forEach(a => wrActions.push({ ...a }));
+      renderWrActions();
+      wrPhotos.length = 0;
+      if (payload.wrPhotos?.length) payload.wrPhotos.forEach(p => wrPhotos.push({ ...p }));
+      renderWrPhotos();
+
+      if (payload.wrAhsLogo) {
+        wrAhsLogoData = payload.wrAhsLogo;
+        const preview = document.getElementById('wr-ahsLogoPreview');
+        const placeholder = document.getElementById('wr-ahsLogoPlaceholder');
+        const clear = document.getElementById('wr-ahsLogoClear');
+        if (preview) { preview.src = payload.wrAhsLogo; preview.style.display = 'block'; }
+        if (placeholder) placeholder.style.display = 'none';
+        if (clear) clear.style.display = 'flex';
+      }
+      if (payload.wrClientLogo) {
+        wrClientLogoData = payload.wrClientLogo;
+        const preview = document.getElementById('wr-clientLogoPreview');
+        const placeholder = document.getElementById('wr-clientLogoPlaceholder');
+        const clear = document.getElementById('wr-clientLogoClear');
+        if (preview) { preview.src = payload.wrClientLogo; preview.style.display = 'block'; }
+        if (placeholder) placeholder.style.display = 'none';
+        if (clear) clear.style.display = 'flex';
+      }
+
+      setTimeout(autoResizeAll, 150);
+      return true;
+    }
+
+    function wrSaveToStorage() {
+      try {
+        const json = JSON.stringify(wrSerialize());
+        localStorage.setItem(WR_STORE_KEY, json);
+        const kb = Math.round(json.length / 1024);
+        showWrToast('Saved to browser (' + kb + ' KB) — safe if you refresh', 'success');
+        return true;
+      } catch (e) {
+        if (e.name === 'QuotaExceededError') showWrToast('Storage full — photos may be too large. Use Save As to download instead.', 'error', 5000);
+        else showWrToast('Save failed: ' + e.message, 'error');
+        return false;
+      }
+    }
+
+    function wrSaveAsHTML() {
+      const payload = wrSerialize();
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+      const clone = document.documentElement.cloneNode(true);
+      const old = clone.querySelector('#' + WR_EMBED_ID);
+      if (old) old.remove();
+      const tag = document.createElement('script');
+      tag.type = 'text/plain';
+      tag.id = WR_EMBED_ID;
+      tag.style.display = 'none';
+      tag.textContent = encoded;
+      clone.querySelector('head').appendChild(tag);
+      const proj = (document.getElementById('wr-projectName')?.value || 'Director-Walkround').replace(/[^a-zA-Z0-9-_ ]/g, '').replace(/\s+/g, '-').substring(0, 40);
+      const datestamp = new Date().toISOString().slice(0, 10);
+      const filename = proj + '_' + datestamp + '.html';
+      const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 600);
+      showWrToast('Saved as "' + filename + '"', 'info', 3500);
+    }
+
+    function wrRestoreOnLoad() {
+      const embedded = document.getElementById(WR_EMBED_ID);
+      if (embedded) {
+        try {
+          const decoded = JSON.parse(decodeURIComponent(escape(atob(embedded.textContent.trim()))));
+          if (wrRestore(decoded)) {
+            localStorage.setItem(WR_STORE_KEY, JSON.stringify(decoded));
+            embedded.remove();
+            showWrToast('Report restored from saved file', 'info', 3000);
+            return;
+          }
+        } catch (e) { console.warn('WR: failed to parse embedded data', e); }
+      }
+      try {
+        const raw = localStorage.getItem(WR_STORE_KEY);
+        if (raw) {
+          const payload = JSON.parse(raw);
+          if (wrRestore(payload)) showWrToast('Auto-restored from last save — ' + new Date(payload.meta.savedAt).toLocaleTimeString('en-GB'), 'info', 3000);
+        }
+      } catch (e) { console.warn('WR: failed to restore from localStorage', e); }
+    }
+
+    let _autoSaveTimer = null;
+    function scheduleAutoSave() {
+      clearTimeout(_autoSaveTimer);
+      _autoSaveTimer = setTimeout(() => {
+        try {
+          const json = JSON.stringify(wrSerialize());
+          localStorage.setItem(WR_STORE_KEY, json);
+          const btn = document.getElementById('wr-btnSave');
+          if (btn) {
+            const orig = btn.innerHTML;
+            btn.innerHTML = btn.innerHTML.replace('Save', 'Saved ✓');
+            setTimeout(() => { btn.innerHTML = orig; }, 1500);
+          }
+        } catch (e) {
+          showWrToast('⚠️ Auto-save failed. Use Save As to keep your work.', 'error', 6000);
+        }
+      }, 3000);
+    }
+
+    function autoResizeTA(el) {
+      el.style.height = 'auto';
+      el.style.height = el.scrollHeight + 'px';
+    }
+
+    function autoResizeAll() {
+      document.querySelectorAll('textarea').forEach(autoResizeTA);
+    }
+
+    document.addEventListener('input', e => {
+      if (e.target.tagName === 'TEXTAREA') {
+        autoResizeTA(e.target);
+      }
+      scheduleAutoSave();
+    }, { passive: true });
+
+    document.addEventListener('change', scheduleAutoSave, { passive: true });
+
+    setInterval(() => {
+      try {
+        localStorage.setItem(WR_STORE_KEY, JSON.stringify(wrSerialize()));
+      } catch (e) {
+        showWrToast('⚠️ Auto-save failed — storage full. Use Save As.', 'error', 7000);
+      }
+    }, 30000);
+
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        wrSaveAsHTML();
+      }
+    });
+
+    // ========== PDF GENERATION ==========
+    const C = {
+      charcoal: [117, 117, 117],
+      cyan: [75, 191, 214],
+      cyanDark: [56, 168, 194],
+      white: [255, 255, 255],
+      lightBg: [242, 244, 247],
+      border: [208, 213, 221],
+      bodyText: [58, 58, 58],
+      muted: [120, 120, 120],
+      success: [26, 122, 74],
+      successBg: [232, 247, 239],
+      successBrd: [167, 227, 192],
+      warning: [160, 80, 10],
+      warningBg: [254, 243, 205],
+      warningBrd: [220, 170, 80],
+      danger: [185, 28, 28],
+      dangerBg: [254, 226, 226],
+      dangerBrd: [252, 165, 165],
+      na: [100, 100, 100],
+      naBg: [240, 240, 240],
+    };
+
+    const PW = 210, MG = 15, CW = 180, PB = 272;
+
+    const STATUS_CFG = {
+      'compliant': { label: 'Compliant', bg: C.successBg, border: C.successBrd, text: C.success },
+      'partial': { label: 'Partial', bg: C.warningBg, border: C.warningBrd, text: C.warning },
+      'non-compliant': { label: 'Non-Compliant', bg: C.dangerBg, border: C.dangerBrd, text: C.danger },
+      'na': { label: 'N/A', bg: C.naBg, border: C.border, text: C.na },
+    };
+
+    function pdfHeader(doc, title, subtitle) {
+      const H = 22;
+      doc.setFillColor(...C.white);
+      doc.rect(0, 0, PW, H, 'F');
+      doc.setFillColor(...C.cyan);
+      doc.rect(0, H - 1.5, PW, 1.5, 'F');
+      const logoZoneW = 28, logoZoneH = H - 5, logoZoneY = 2;
+      if (wrAhsLogoData) pdfDrawLogo(doc, wrAhsLogoData, 3, logoZoneY, logoZoneW, logoZoneH);
+      else { doc.setFontSize(7); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.charcoal); doc.text('AHS', 3 + logoZoneW / 2, H / 2 + 1, { align: 'center' }); }
+      if (wrClientLogoData) pdfDrawLogo(doc, wrClientLogoData, PW - logoZoneW - 3, logoZoneY, logoZoneW, logoZoneH);
+      const titleX = 3 + logoZoneW + 3, titleW = PW - (titleX * 2);
+      doc.setFontSize(12); doc.setFont(undefined, 'bold'); doc.setTextColor(...C.charcoal);
+      doc.text(title, PW / 2, subtitle ? 9 : 12, { align: 'center', maxWidth: titleW });
+      if (subtitle) { doc.setFontSize(7.5); doc.setFont(undefined, 'normal'); doc.setTextColor(...C.muted); doc.text(subtitle, PW / 2, 16, { align: 'center', maxWidth: titleW }); }
+      return H + 5;
+    }
+
+    function pdfFooter(doc) {
+      doc.setDrawColor(...C.cyanDark);
+      doc.setLineWidth(0.35);
+      doc.line(MG, 281, MG + CW, 281);
+      if (wrAhsLogoData) {
+        pdfDrawLogo(doc, wrAhsLogoData, MG, 282.5, 20, 7);
+        doc.setFontSize(6.5);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(...C.muted);
+        doc.text('AHS Compliance Consulting', MG + 22, 287);
+      } else {
+        doc.setFontSize(7);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...C.muted);
+        doc.text('AHS Compliance Consulting', MG, 287);
+      }
+      doc.setFont(undefined, 'italic');
+      doc.setFontSize(6);
+      doc.setTextColor(...C.muted);
+      doc.text('Uncontrolled if printed', PW / 2, 287, { align: 'center' });
+    }
+
+    function pdfSectionBar(doc, title, y) {
+      doc.setFillColor(...C.lightBg);
+      doc.setDrawColor(...C.border);
+      doc.setLineWidth(0.3);
+      doc.rect(MG, y, CW, 7, 'FD');
+      doc.setFillColor(...C.cyan);
+      doc.rect(MG, y, 2.5, 7, 'F');
+      doc.setFontSize(8.5);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...C.charcoal);
+      doc.text(title, MG + 6, y + 5);
+      return y + 9;
+    }
+
+    function pdfStatusPill(doc, status, cx, cy, w) {
+      const cfg = STATUS_CFG[status] || STATUS_CFG['na'];
+      const h = 5.5;
+      doc.setFillColor(...cfg.bg);
+      doc.setDrawColor(...cfg.border);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(cx, cy - h / 2, w, h, 1.2, 1.2, 'FD');
+      doc.setFontSize(7.5);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...cfg.text);
+      doc.text(cfg.label, cx + w / 2, cy + 0.8, { align: 'center' });
+    }
+
+    function pdfDrawLogo(doc, dataUrl, boxX, boxY, boxW, boxH) {
+      if (!dataUrl) return;
+      try {
+        const props = doc.getImageProperties(dataUrl);
+        const aspect = props.width / props.height;
+        let drawW = boxW, drawH = boxW / aspect;
+        if (drawH > boxH) { drawH = boxH; drawW = boxH * aspect; }
+        const dx = boxX + (boxW - drawW) / 2, dy = boxY + (boxH - drawH) / 2;
+        doc.addImage(dataUrl, dx, dy, drawW, drawH);
+      } catch (e) { }
+    }
+
+    function pdfBuildCover(doc, reportTitle, subtitle, projectName, clientNameVal) {
+      const coverBandH = 52;
+      doc.setFillColor(...C.white);
+      doc.rect(0, 0, PW, coverBandH, 'F');
+      doc.setFillColor(...C.cyan);
+      doc.rect(0, coverBandH - 1.5, PW, 1.5, 'F');
+      if (wrAhsLogoData) pdfDrawLogo(doc, wrAhsLogoData, 6, 4, 40, coverBandH - 12);
+      else {
+        doc.setFontSize(7.5);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...C.charcoal);
+        doc.text('AHS Compliance', 10, coverBandH - 8);
+        doc.text('Consulting', 10, coverBandH - 3.5);
+      }
+      if (wrClientLogoData) pdfDrawLogo(doc, wrClientLogoData, PW - 46, 4, 40, coverBandH - 12);
+      else if (clientNameVal) {
+        doc.setFontSize(7.5);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(...C.muted);
+        doc.text('Prepared for:', PW - 8, coverBandH - 10, { align: 'right' });
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...C.charcoal);
+        doc.text(clientNameVal, PW - 8, coverBandH - 5, { align: 'right' });
+      }
+      doc.setFontSize(20);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...C.charcoal);
+      doc.text(reportTitle, PW / 2, 22, { align: 'center' });
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...C.muted);
+      doc.text(subtitle, PW / 2, 32, { align: 'center' });
+      return coverBandH + 8;
+    }
+
+    function pdfCoverDetailsGrid(doc, fields, y, extraFullWidth) {
+      const halfW = (CW - 4) / 2, cellH = 13;
+      const rows = [];
+      for (let i = 0; i < fields.length; i += 2) rows.push([fields[i], fields[i + 1] || null]);
+
+      // Pre-calculate extra row height for full-width field
+      let extraH = 0;
+      let extraLines = [];
+      if (extraFullWidth && extraFullWidth[1]) {
+        doc.setFontSize(9); doc.setFont(undefined, 'normal');
+        extraLines = doc.splitTextToSize(extraFullWidth[1], CW - 12);
+        extraH = cellH + Math.max(0, Math.min(extraLines.length, 4) - 1) * 5;
+      }
+
+      const gridH = rows.length * cellH + 4 + (extraH > 0 ? extraH + 2 : 0);
+      doc.setFillColor(...C.white);
+      doc.setDrawColor(...C.border);
+      doc.setLineWidth(0.35);
+      doc.rect(MG, y, CW, gridH, 'FD');
+      doc.setFillColor(...C.white);
+      doc.rect(MG, y, CW, 7, 'F');
+      doc.setDrawColor(...C.border);
+      doc.setLineWidth(0.3);
+      doc.line(MG, y + 7, MG + CW, y + 7);
+      doc.setFillColor(...C.cyan);
+      doc.rect(MG, y, 2.5, 7, 'F');
+      doc.setFontSize(8.5);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...C.charcoal);
+      doc.text('REPORT DETAILS', MG + 5, y + 4.8);
+      let ry = y + 9;
+      rows.forEach((row, ri) => {
+        if (ri > 0) {
+          doc.setDrawColor(...C.border);
+          doc.setLineWidth(0.2);
+          doc.line(MG, ry - 1, MG + CW, ry - 1);
+        }
+        row.forEach((cell, ci) => {
+          if (!cell) return;
+          const [label, value] = cell;
+          const cx = MG + ci * (halfW + 4) + 1;
+          if (ci === 1) {
+            doc.setDrawColor(...C.border);
+            doc.setLineWidth(0.2);
+            doc.line(MG + halfW + 3, ry - 1, MG + halfW + 3, ry + cellH - 1);
+          }
+          doc.setFontSize(7.5);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...C.muted);
+          doc.text(label.toUpperCase(), cx + 2, ry + 3.5);
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...C.bodyText);
+          if (value) {
+            const vl = doc.splitTextToSize(value, halfW - 6);
+            doc.text(vl[0] || '', cx + 2, ry + 9);
+          } else {
+            doc.setTextColor(...C.muted);
+            doc.setFont(undefined, 'italic');
+            doc.text('\u2014', cx + 2, ry + 9);
+          }
+        });
+        ry += cellH;
+      });
+
+      // Full-width extra field (e.g. Areas Inspected) inside the same card
+      if (extraH > 0) {
+        doc.setDrawColor(...C.border);
+        doc.setLineWidth(0.2);
+        doc.line(MG, ry - 1, MG + CW, ry - 1);
+        doc.setFontSize(7.5);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...C.muted);
+        doc.text(extraFullWidth[0].toUpperCase(), MG + 3, ry + 3.5);
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(...C.bodyText);
+        extraLines.slice(0, 4).forEach((ln, li) => {
+          doc.text(ln, MG + 3, ry + 9 + li * 5);
+        });
+      }
+
+      return y + gridH + 8;
+    }
+
+    function pdfDrawColHeaders(doc, y, col1X, col2X, col3X) {
+      doc.setFillColor(...C.lightBg);
+      doc.setDrawColor(...C.border);
+      doc.setLineWidth(0.3);
+      doc.rect(MG, y, CW, 6.5, 'FD');
+      doc.setFillColor(...C.cyan);
+      doc.rect(MG, y, 2.5, 6.5, 'F');
+      doc.setFontSize(7.5);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...C.charcoal);
+      doc.text('REQUIREMENT', col1X + 5, y + 4.5);
+      doc.text('STATUS', col2X + 3, y + 4.5);
+      doc.text('NOTES', col3X + 3, y + 4.5);
+      return y + 7.5;
+    }
+
+    function pdfChecklist(doc, items, newPage, pdfFooter, pageTitle) {
+      const col1W = CW * 0.46, col2W = CW * 0.21, col3W = CW * 0.33;
+      const col1X = MG, col2X = MG + col1W + 1, col3X = col2X + col2W + 1;
+      const grouped = {};
+      const order = [];
+      items.forEach(item => {
+        if (!grouped[item.category]) { grouped[item.category] = []; order.push(item.category); }
+        grouped[item.category].push(item);
+      });
+      let y = newPage(pageTitle, null);
+      y = pdfDrawColHeaders(doc, y, col1X, col2X, col3X);
+      order.forEach(cat => {
+        const catItems = grouped[cat];
+        let catH = 9;
+        doc.setFontSize(8.5);
+        catItems.forEach(item => {
+          const rl = doc.splitTextToSize(item.requirement, col1W - 4);
+          const nl = item.notes ? doc.splitTextToSize(item.notes, col3W - 4) : [];
+          catH += Math.max(rl.length, nl.length || 1) * 4.5 + 5;
+        });
+        if (y + catH > PB) { pdfFooter(doc); y = newPage(pageTitle, 'continued'); y = pdfDrawColHeaders(doc, y, col1X, col2X, col3X); }
+        doc.setFillColor(...C.lightBg);
+        doc.rect(MG, y, CW, 6.5, 'F');
+        doc.setFillColor(...C.cyan);
+        doc.rect(MG, y, 2.5, 6.5, 'F');
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...C.charcoal);
+        doc.text(cat.toUpperCase(), MG + 5, y + 4.5);
+        y += 8;
+        catItems.forEach((item, idx) => {
+          doc.setFontSize(8.5);
+          doc.setFont(undefined, 'normal');
+          const rl = doc.splitTextToSize(item.requirement, col1W - 4);
+          const nl = item.notes ? doc.splitTextToSize(item.notes, col3W - 4) : [];
+          const rH = Math.max(rl.length, nl.length || 1) * 4.5 + 5;
+          doc.setFillColor(...(idx % 2 === 0 ? C.white : C.lightBg));
+          doc.rect(MG, y, CW, rH, 'F');
+          doc.setDrawColor(...C.border);
+          doc.setLineWidth(0.2);
+          doc.line(MG, y + rH, MG + CW, y + rH);
+          doc.line(col2X - 1, y, col2X - 1, y + rH);
+          doc.line(col3X - 1, y, col3X - 1, y + rH);
+          doc.setTextColor(...C.bodyText);
+          rl.forEach((l, li) => doc.text(l, col1X + 3, y + 3.5 + li * 4.5));
+          pdfStatusPill(doc, item.status, col2X, y + rH / 2, col2W - 2);
+          if (item.notes) {
+            doc.setFontSize(8);
+            doc.setFont(undefined, 'italic');
+            doc.setTextColor(...C.muted);
+            nl.forEach((l, li) => doc.text(l, col3X + 3, y + 3.5 + li * 4.5));
+          }
+          y += rH;
+        });
+        y += 3;
+      });
+      return y;
+    }
+
+    function pdfFreetext(doc, label, value, startY, newPageFn, footerFn, pageTitle) {
+      if (!value) return startY;
+      const FONT_SIZE = 9.5;
+      const lineH = 5.2;
+      const TEXT_W = CW - 9;
+      const PAD_TOP = 5;
+      const PAD_BOT = 5;
+      doc.setFontSize(FONT_SIZE);
+      doc.setFont(undefined, 'normal');
+      const allLines = doc.splitTextToSize(value, TEXT_W);
+      let y = startY;
+      let isFirst = true;
+      let i = 0;
+      while (i < allLines.length) {
+        if (isFirst) {
+          if (y + 18 + lineH > PB) { footerFn(doc); y = newPageFn(pageTitle, 'continued'); }
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...C.charcoal);
+          doc.text(label.toUpperCase(), MG, y);
+          doc.setDrawColor(...C.cyan);
+          doc.setLineWidth(0.5);
+          doc.line(MG, y + 1.5, MG + CW, y + 1.5);
+          y += 6;
+          isFirst = false;
+        }
+        const maxL = Math.max(1, Math.floor((PB - y - 12) / lineH));
+        const chunk = allLines.slice(i, i + maxL);
+        const boxH = PAD_TOP + chunk.length * lineH + PAD_BOT;
+        doc.setFillColor(...C.white);
+        doc.setDrawColor(...C.border);
+        doc.setLineWidth(0.3);
+        doc.rect(MG, y, CW, boxH, 'FD');
+        doc.setFillColor(...C.cyan);
+        doc.rect(MG, y, 2.5, boxH, 'F');
+        doc.setFontSize(FONT_SIZE);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(...C.bodyText);
+        chunk.forEach((ln, li) => doc.text(ln, MG + 5, y + PAD_TOP + li * lineH));
+        i += chunk.length;
+        y += boxH + (i < allLines.length ? 3 : 8);
+        if (i < allLines.length) { footerFn(doc); y = newPageFn(pageTitle, 'continued'); }
+      }
+      return y;
+    }
+
+    function pdfActions(doc, actions, y, newPage, pdfFooter, pageTitle, colLabel) {
+      if (!actions.length) return y;
+      if (y + 10 > PB) { pdfFooter(doc); y = newPage(pageTitle, 'continued'); }
+      y = pdfSectionBar(doc, colLabel || 'ACTIONS', y);
+      y += 2;
+      const priCfg = {
+        'low': { bg: C.successBg, text: C.success, label: 'Low' },
+        'medium': { bg: C.warningBg, text: C.warning, label: 'Medium' },
+        'high': { bg: C.dangerBg, text: C.danger, label: 'High' },
+        'stop': { bg: C.danger, text: C.white, label: 'STOP WORKS' },
+      };
+      actions.forEach((a, idx) => {
+        doc.setFontSize(9);
+        const descL = a.description ? doc.splitTextToSize(a.description, CW - 8) : [];
+        const cardH = 8 + descL.length * 4.5 + 14;
+        if (y + cardH > PB) { pdfFooter(doc); y = newPage(pageTitle, 'continued'); }
+        const cfg = priCfg[a.priority] || priCfg['medium'];
+        doc.setFillColor(...C.lightBg);
+        doc.setDrawColor(...C.border);
+        doc.setLineWidth(0.35);
+        doc.rect(MG, y, CW, cardH, 'FD');
+        doc.setFillColor(...C.white);
+        doc.rect(MG, y, CW, 7, 'F');
+        doc.setDrawColor(...C.border);
+        doc.setLineWidth(0.3);
+        doc.line(MG, y + 7, MG + CW, y + 7);
+        doc.setFillColor(...cfg.bg);
+        doc.rect(MG, y, 3, 7, 'F');
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...cfg.text);
+        doc.text('ACTION #' + String(idx + 1).padStart(3, '0') + '  \u2014  ' + cfg.label.toUpperCase(), MG + 5, y + 5);
+        let cy = y + 10;
+        if (descL.length) {
+          doc.setFontSize(9.5);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...C.bodyText);
+          descL.forEach((l, li) => doc.text(l, MG + 3, cy + li * 4.5));
+          cy += descL.length * 4.5 + 3;
+        }
+        const meta = [];
+        if (a.responsible) meta.push('Responsible: ' + a.responsible);
+        if (a.dueDate) meta.push('Due: ' + new Date(a.dueDate).toLocaleDateString('en-GB'));
+        if (meta.length) {
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'italic');
+          doc.setTextColor(...C.muted);
+          doc.text(meta.join('   |   '), MG + 3, cy);
+        }
+        y += cardH + 4;
+      });
+      return y;
+    }
+
+    function pdfSignOff(doc, name, dateStr, roleLabel) {
+      const sigY = 248;
+      doc.setDrawColor(...C.border);
+      doc.setLineWidth(0.3);
+      doc.rect(MG, sigY, 82, 20, 'D');
+      doc.setFillColor(...C.lightBg);
+      doc.rect(MG, sigY, 82, 7, 'F');
+      doc.setFillColor(...C.cyan);
+      doc.rect(MG, sigY, 2.5, 7, 'F');
+      doc.setFontSize(7.5);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...C.charcoal);
+      doc.text(roleLabel || 'SIGNED BY', MG + 5, sigY + 5);
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(...C.bodyText);
+      if (name) doc.text(name, MG + 3, sigY + 12);
+      doc.setFontSize(8);
+      doc.setTextColor(...C.muted);
+      if (dateStr) doc.text(new Date(dateStr).toLocaleDateString('en-GB'), MG + 3, sigY + 17.5);
+      doc.rect(MG + 88, sigY, 82, 20, 'D');
+      doc.setFillColor(...C.lightBg);
+      doc.rect(MG + 88, sigY, 82, 7, 'F');
+      doc.setFillColor(...C.cyan);
+      doc.rect(MG + 88, sigY, 2.5, 7, 'F');
+      doc.setFontSize(7.5);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...C.charcoal);
+      doc.text('SIGNATURE', MG + 93, sigY + 5);
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'italic');
+      doc.setTextColor(...C.muted);
+      doc.text('Sign printed copy', MG + 91, sigY + 12);
+    }
+
+    function pdfPageNumbers(doc, projectName) {
+      const total = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= total; i++) {
+        doc.setPage(i);
+        doc.setFontSize(7);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(...C.muted);
+        const lbl = 'Page ' + i + ' of ' + total;
+        doc.text(lbl, PW - MG, 287, { align: 'right' });
+        if (projectName) {
+          const w = doc.getTextWidth(lbl);
+          const proj = doc.splitTextToSize(projectName, 60)[0];
+          doc.text(proj, PW - MG - w - 4, 287, { align: 'right' });
+        }
+      }
+    }
+
+    async function generateWRReport() {
+      const btn = document.getElementById('wr-btnPDF');
+      const orig = btn.innerHTML;
+      btn.innerHTML = '&#9203; Generating...';
+      btn.disabled = true;
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        let pageCount = 0;
+        const g = id => (document.getElementById(id)?.value || '').trim();
+        const projName = g('wr-projectName'), projRef = g('wr-projectRef'), siteAddr = g('wr-siteAddress'), client = g('wr-clientName');
+        const pc = g('wr-principalContractor'), dateRaw = g('wr-date'), director = g('wr-director'), pcRep = g('wr-pcRep'), areas = g('wr-areas');
+        const positives = g('wr-positives'), concerns = g('wr-concerns'), rating = g('wr-rating'), followup = g('wr-followupDate');
+        const comments = g('wr-comments'), dirPrint = g('wr-directorPrint'), signDate = g('wr-signedDate');
+        const dispDate = dateRaw ? new Date(dateRaw).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }) : '';
+        const safeName = (projName || 'Director-Walkround').replace(/[^a-zA-Z0-9-_ ]/g, '').replace(/\s+/g, '-').substring(0, 40);
+        function newPage(title, sub) { if (pageCount > 0) doc.addPage(); pageCount++; return pdfHeader(doc, title, sub); }
+
+        pageCount++;
+        let y = pdfBuildCover(doc, 'DIRECTOR WALKROUND', 'Site Inspection Report', projName, client);
+        y = pdfCoverDetailsGrid(doc, [['Project Name', projName], ['Project Reference', projRef], ['Site Address', siteAddr], ['Client', client], ['Principal Contractor', pc], ['Walkround Date', dispDate], ['Director / Inspector', director], ['PC Representative', pcRep]], y, areas ? ['Areas Inspected', areas] : null);
+
+        const counts = { compliant: 0, partial: 0, 'non-compliant': 0, na: 0 };
+        wrItems.forEach(i => counts[i.status] = (counts[i.status] || 0) + 1);
+        if (y < 240) {
+          y += 5;
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...C.charcoal);
+          doc.text('SITE CONDITION SUMMARY', MG, y);
+          y += 5;
+          const pW = 40, pG = 5;
+          [{ count: counts.compliant, label: 'COMPLIANT', ...STATUS_CFG['compliant'] }, { count: counts.partial, label: 'PARTIAL', ...STATUS_CFG['partial'] }, { count: counts['non-compliant'], label: 'ISSUES', ...STATUS_CFG['non-compliant'] }, { count: counts.na, label: 'N/A', ...STATUS_CFG['na'] }]
+            .forEach((p, i) => {
+              const px = MG + i * (pW + pG);
+              doc.setFillColor(...p.bg);
+              doc.setDrawColor(...p.border);
+              doc.setLineWidth(0.3);
+              doc.roundedRect(px, y, pW, 18, 2, 2, 'FD');
+              doc.setFontSize(18);
+              doc.setFont(undefined, 'bold');
+              doc.setTextColor(...p.text);
+              doc.text(String(p.count), px + pW / 2, y + 10.5, { align: 'center' });
+              doc.setFontSize(6.5);
+              doc.setFont(undefined, 'bold');
+              doc.text(p.label, px + pW / 2, y + 16, { align: 'center' });
+            });
+        }
+        pdfFooter(doc);
+
+        y = pdfChecklist(doc, wrItems, newPage, pdfFooter, 'Site Condition Checklist');
+        pdfFooter(doc);
+
+        y = newPage('Observations & Actions', 'Director Walkround');
+        if (positives) y = pdfFreetext(doc, 'Positive Observations', positives, y, newPage, pdfFooter, 'Observations & Actions');
+        if (concerns) y = pdfFreetext(doc, 'Areas of Concern', concerns, y, newPage, pdfFooter, 'Observations & Actions');
+        y = pdfActions(doc, wrActions, y, newPage, pdfFooter, 'Observations & Actions', 'IMMEDIATE ACTIONS REQUIRED');
+
+        // ── Site Photographs pages ──
+        if (wrPhotos.length > 0) {
+          const COLS = 2, ROWS = 2, PER_PG = 4;
+          const IMG_W = (CW - 6) / COLS, IMG_H = IMG_W * 0.75, GAP = 4;
+          const LINE_H = 4.5, CAP_PAD_TOP = 4, CAP_PAD_BOT = 4;
+
+          function calcCapH(photo) {
+            doc.setFontSize(7.5);
+            let h = CAP_PAD_TOP;
+            if (photo.caption) {
+              const lines = doc.splitTextToSize(photo.caption, IMG_W - 4);
+              h += Math.min(lines.length, 3) * LINE_H;
+            } else {
+              h += LINE_H;
+            }
+            if (photo.location) h += LINE_H + 2;
+            return h + CAP_PAD_BOT;
+          }
+
+          function drawPhotoCell(photo, cellX, cellY, capH, displayIdx) {
+            doc.setFillColor(...C.lightBg); doc.setDrawColor(...C.border); doc.setLineWidth(0.3);
+            doc.rect(cellX, cellY, IMG_W, IMG_H, 'FD');
+            try {
+              const props = doc.getImageProperties(photo.dataUrl);
+              const imgAspect = props.width / props.height;
+              const cellAspect = IMG_W / IMG_H;
+              let drawW, drawH, drawX, drawY;
+              if (imgAspect > cellAspect) {
+                drawH = IMG_H; drawW = IMG_H * imgAspect;
+                drawX = cellX - (drawW - IMG_W) / 2; drawY = cellY;
+              } else {
+                drawW = IMG_W; drawH = IMG_W / imgAspect;
+                drawX = cellX; drawY = cellY - (drawH - IMG_H) / 2;
+              }
+              doc.saveGraphicsState();
+              const k = doc.internal.scaleFactor, pgH = doc.internal.pageSize.getHeight();
+              const px1 = cellX * k, py1 = (pgH - (cellY + IMG_H)) * k;
+              const px2 = (cellX + IMG_W) * k, py2 = (pgH - cellY) * k;
+              doc.internal.write(px1.toFixed(2)+' '+py1.toFixed(2)+' m '+px2.toFixed(2)+' '+py1.toFixed(2)+' l '+px2.toFixed(2)+' '+py2.toFixed(2)+' l '+px1.toFixed(2)+' '+py2.toFixed(2)+' l W n');
+              doc.addImage(photo.dataUrl, drawX, drawY, drawW, drawH);
+              doc.restoreGraphicsState();
+              doc.setFillColor(0,0,0,0); doc.setDrawColor(...C.border); doc.setLineWidth(0.4);
+              doc.rect(cellX, cellY, IMG_W, IMG_H);
+            } catch(e) {
+              doc.setFontSize(8); doc.setFont(undefined,'italic'); doc.setTextColor(...C.muted);
+              doc.text('Image unavailable', cellX + IMG_W/2, cellY + IMG_H/2, { align:'center' });
+            }
+            // IMG badge
+            doc.setFillColor(...C.charcoal);
+            doc.roundedRect(cellX + 2, cellY + 2, 18, 5.5, 1, 1, 'F');
+            doc.setFontSize(7); doc.setFont(undefined,'bold'); doc.setTextColor(...C.white);
+            doc.text('IMG ' + String(displayIdx).padStart(2,'0'), cellX + 4, cellY + 6.3);
+            // Caption box
+            const capY = cellY + IMG_H;
+            doc.setFillColor(...C.white); doc.setDrawColor(...C.border); doc.setLineWidth(0.3);
+            doc.rect(cellX, capY, IMG_W, capH, 'FD');
+            let ty = capY + CAP_PAD_TOP;
+            doc.setFontSize(7.5); doc.setFont(undefined,'normal'); doc.setTextColor(...C.charcoal);
+            if (photo.caption) {
+              const capLines = doc.splitTextToSize(photo.caption, IMG_W - 4);
+              capLines.slice(0, 3).forEach(l => { doc.text(l, cellX + 2, ty); ty += LINE_H; });
+            } else {
+              doc.setFont(undefined,'italic'); doc.setTextColor(...C.muted);
+              doc.text('No caption', cellX + 2, ty); ty += LINE_H;
+            }
+            if (photo.location) {
+              ty += 1;
+              doc.setFontSize(6.5); doc.setFont(undefined,'italic'); doc.setTextColor(...C.muted);
+              doc.text('Location: ' + photo.location, cellX + 2, ty);
+            }
+          }
+
+          let photoIdx = 0;
+          while (photoIdx < wrPhotos.length) {
+            y = newPage('Site Photographs', `${wrPhotos.length} photo${wrPhotos.length !== 1 ? 's' : ''} \u2014 ${safeName}`);
+            const from = photoIdx + 1;
+            const to = Math.min(photoIdx + PER_PG, wrPhotos.length);
+            doc.setFontSize(8); doc.setFont(undefined,'italic'); doc.setTextColor(...C.muted);
+            doc.text(`Photos ${from}\u2013${to} of ${wrPhotos.length}`, PW - MG, y, { align:'right' });
+            y += 5;
+            const pagePhotos = wrPhotos.slice(photoIdx, photoIdx + PER_PG);
+            const numRows = Math.ceil(pagePhotos.length / COLS);
+            const rowCapH = [];
+            for (let r = 0; r < numRows; r++) {
+              let maxH = 0;
+              for (let c = 0; c < COLS; c++) {
+                const p = pagePhotos[r * COLS + c];
+                if (p) maxH = Math.max(maxH, calcCapH(p));
+              }
+              rowCapH.push(maxH);
+            }
+            let rowStartY = y;
+            for (let r = 0; r < numRows; r++) {
+              for (let c = 0; c < COLS; c++) {
+                const slotIdx = r * COLS + c;
+                if (slotIdx >= pagePhotos.length) break;
+                const photo = pagePhotos[slotIdx];
+                const cellX = MG + c * (IMG_W + GAP);
+                drawPhotoCell(photo, cellX, rowStartY, rowCapH[r], photoIdx + slotIdx + 1);
+              }
+              rowStartY += IMG_H + rowCapH[r] + GAP;
+            }
+            photoIdx += pagePhotos.length;
+            pdfFooter(doc);
+          }
+          y = 999; // force new page for sign-off after photos
+        }
+
+        if (rating) {
+          if (y + 40 > PB) { pdfFooter(doc); y = newPage('Director Sign-Off', 'Director Walkround'); }
+          y = pdfSectionBar(doc, 'DIRECTOR SIGN-OFF', y);
+          y += 4;
+          const rc = rating.includes('Good') ? C.success : rating.includes('Satisfactory') ? C.warning : C.danger;
+          doc.setFillColor(...C.lightBg);
+          doc.setDrawColor(...C.border);
+          doc.setLineWidth(0.35);
+          doc.rect(MG, y, CW, 12, 'FD');
+          doc.setFillColor(...C.cyan);
+          doc.rect(MG, y, 3, 12, 'F');
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...C.muted);
+          doc.text('OVERALL SITE RATING', MG + 5, y + 4.5);
+          doc.setFontSize(10);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...rc);
+          doc.text(rating, MG + 5, y + 10);
+          y += 16;
+          if (followup) {
+            doc.setFontSize(8);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...C.muted);
+            doc.text('Follow-up required by: ' + new Date(followup).toLocaleDateString('en-GB'), MG, y);
+            y += 6;
+          }
+        }
+        if (comments) {
+          if (y + 20 > PB) { pdfFooter(doc); y = newPage('Director Sign-Off', 'Director Walkround'); }
+          y = pdfFreetext(doc, "Director's Comments", comments, y, newPage, pdfFooter, 'Director Sign-Off');
+        }
+        if (y + 30 > PB) { pdfFooter(doc); y = newPage('Director Sign-Off', 'Director Walkround'); }
+        pdfSignOff(doc, dirPrint, signDate, 'DIRECTOR');
+        pdfFooter(doc);
+        pdfPageNumbers(doc, projName || 'Director Walkround');
+        doc.save(safeName + '_Walkround_' + new Date().toISOString().slice(0, 10) + '.pdf');
+        btn.innerHTML = orig;
+        btn.disabled = false;
+      } catch (e) {
+        console.error(e);
+        alert('PDF error: ' + e.message);
+        btn.innerHTML = orig;
+        btn.disabled = false;
+      }
+    }
+
+    // ========== INITIALIZATION ==========
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('wr-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('wr-signedDate').value = new Date().toISOString().split('T')[0];
+      renderWrChecklist();
+      renderWrActions();
+      renderWrPhotos();
+
+      const ahsIn = document.getElementById('wr-ahsLogoInput');
+      const clientIn = document.getElementById('wr-clientLogoInput');
+      const photoIn = document.getElementById('wr-photoInput');
+      if (ahsIn) ahsIn.addEventListener('change', () => loadWrLogo('ahs', ahsIn));
+      if (clientIn) clientIn.addEventListener('change', () => loadWrLogo('client', clientIn));
+      if (photoIn) photoIn.addEventListener('change', () => handleWrPhotoUpload(photoIn));
+
+      const btnSave = document.getElementById('wr-btnSave');
+      const btnSaveAs = document.getElementById('wr-btnSaveAs');
+      const btnPDF = document.getElementById('wr-btnPDF');
+      if (btnSave) btnSave.addEventListener('click', wrSaveToStorage);
+      if (btnSaveAs) btnSaveAs.addEventListener('click', wrSaveAsHTML);
+      if (btnPDF) btnPDF.addEventListener('click', generateWRReport);
+
+      autoResizeAll();
+      setTimeout(wrRestoreOnLoad, 80);
+    });
+  </script>
+</body>
+</html>
